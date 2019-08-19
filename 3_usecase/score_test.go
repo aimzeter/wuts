@@ -59,7 +59,7 @@ func TestSetScore(t *testing.T) {
 			wantCreatedStudent: zone.Student{},
 		},
 		{
-			name:  "participant score not pass threshold",
+			name:  "participant agree to auto register school but score not pass threshold",
 			nik:   "1234567890",
 			score: 60.0,
 			participantSeed: []zone.Participant{{
@@ -69,7 +69,7 @@ func TestSetScore(t *testing.T) {
 					Address: "Bar",
 					Coord:   zone.Coord{0, 0},
 				},
-				AutoReg:  false,
+				AutoReg:  true,
 				Distance: 0.0,
 			}},
 			wantCreatedStudent: zone.Student{},

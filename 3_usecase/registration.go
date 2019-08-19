@@ -6,8 +6,8 @@ import (
 
 func (app *AppUsecase) Register(nik string, autoReg bool) error {
 	c := app.CStore.Get(nik)
-	dis := SchoolDistance(c.Coord)
 
+	dis := SchoolDistance(c.Coord)
 	if dis > ZoneThreshold {
 		return errors.New("sorry you're too far away")
 	}
