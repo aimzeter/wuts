@@ -1,0 +1,119 @@
+// try using share behaviour
+
+package params_test
+
+import (
+	"bytes"
+	"io"
+	"testing"
+
+	params "github.com/aimzeter/wuts/1_basic/evo"
+)
+
+func TestGetNIK(t *testing.T) {
+	sharedBehaviour(t, func(body io.Reader) error {
+		_, err := params.GetNIK(body)
+		return err
+	})
+
+	tests := []struct {
+		name string
+		body string
+
+		isError bool
+		wantNIK string
+	}{
+
+		{
+			name: "valid body",
+			body: `
+				{
+					"nik": "1234567890"
+				}`,
+			isError: false,
+			wantNIK: "1234567890",
+		},
+	}
+
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			input := bytes.NewBufferString(tc.body)
+
+			nik, err := params.GetNIK(input)
+			assertError(t, tc.isError, err)
+			assertNIK(t, tc.wantNIK, nik)
+		})
+	}
+}
+
+func sharedBehaviour(t *testing.T, sutFn func(body io.Reader) error) {
+	t.Helper()
+
+	tests := []struct {
+		name string
+		body string
+
+		isError bool
+	}{
+		{
+			name: "field not found",
+			body: `
+				{
+					"random_id": 1
+				}`,
+			isError: false,
+		},
+		{
+			name:    "empty body",
+			body:    `null`,
+			isError: true,
+		},
+		{
+			name: "invalid body",
+			body: `
+				{
+					nik: "1234567890"
+				}`,
+			isError: true,
+		},
+	}
+
+	for _, tc := range tests {
+		input := bytes.NewBufferString(tc.body)
+
+		err := sutFn(input)
+		assertError(t, tc.isError, err)
+	}
+}
+
+func assertError(t *testing.T, want bool, err error) {
+	t.Helper()
+	got := err != nil
+	if want != got {
+		if want {
+			t.Fatalf("❌ FAIL ❌: should return error\n")
+		}
+		t.Fatalf("❌ FAIL ❌: should not return error, got error '%s'\n", err.Error())
+	}
+}
+
+func assertID(t *testing.T, want, got uint64) {
+	t.Helper()
+	if want != got {
+		t.Errorf("❌ FAIL ❌: did not return correct id.\n"+
+			"\twant:\t%d\n"+
+			"\tgot:\t%d\n", want, got)
+	}
+}
+
+func assertNIK(t *testing.T, want, got string) {
+	t.Helper()
+	if want != got {
+		t.Errorf("❌ FAIL ❌: did not return correct nik.\n"+
+			"\twant:\t%s\n"+
+			"\tgot:\t%s\n", want, got)
+	}
+}
+
