@@ -1,2 +1,2 @@
 # wuts
-wut with solution
+[WUT](https://github.com/aimzeter/wut) with solution
